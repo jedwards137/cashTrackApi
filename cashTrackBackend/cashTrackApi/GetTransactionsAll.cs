@@ -11,15 +11,15 @@ using System.Threading.Tasks;
 
 namespace cashTrackApi
 {
-  public static class GetAllTransactions
+  public static class GetTransactionsAll
   {
-    [FunctionName("GetAllTransactions")]
+    [FunctionName("GetTransactionsAll")]
     public static async Task<IActionResult> Run(
       [HttpTrigger(AuthorizationLevel.Function, "get", Route = "transactions")] HttpRequest req, ILogger log)
     {
-      var dbConnectionStr = Environment.GetEnvironmentVariable("sqldb_connection");
-      var query = "exec [dbo].[getAllTransactions]";
       var transactionList = new List<TransactionResource>();
+      var dbConnectionStr = Environment.GetEnvironmentVariable("sqldb_connection");
+      var query = "exec [dbo].[getTransactionsAll]";
 
       try
       {
@@ -43,18 +43,11 @@ namespace cashTrackApi
       }
       catch (Exception e)
       {
-        log.LogError(e.ToString());
+        log.LogError($"Error executing GetAllTransactions :: {e}");
+        return new BadRequestResult();
       }
 
-      var returnedTransactions = transactionList.Count > 0;
-      if (returnedTransactions)
-      {
-        return new OkObjectResult(transactionList);
-      }
-      else
-      {
-        return new NotFoundResult();
-      }
+      return new OkObjectResult(transactionList);
     }
   }
 }

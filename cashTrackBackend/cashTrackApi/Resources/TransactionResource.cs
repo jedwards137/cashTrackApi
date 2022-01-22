@@ -23,7 +23,7 @@ namespace cashTrackApi.Resources
     public string Account { get; set; }
 
     [Required]
-    [Range(0, 99999.99)]
+    [Range(0.01, 99999.99)]
     public double Amount { get; set; }
   }
 }

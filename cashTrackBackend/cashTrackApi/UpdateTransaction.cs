@@ -11,33 +11,33 @@ using System.Threading.Tasks;
 
 namespace cashTrackApi
 {
-  public static class CreateTransaction
+  public static class UpdateTransaction
   {
-    [FunctionName("CreateTransaction")]
+    [FunctionName("UpdateTransaction")]
     public static async Task<IActionResult> Run(
-        [HttpTrigger(AuthorizationLevel.Function, "post", Route = "transactions")] HttpRequest req, ILogger log)
+        [HttpTrigger(AuthorizationLevel.Function, "put", Route = "transactions/{tId}")] HttpRequest req, string tId, ILogger log)
     {
       var httpRequestBody = await req.GetBodyAsync<TransactionResource>();
-
       var isInvalidRequestBody = !httpRequestBody.IsValid;
       if (isInvalidRequestBody)
       {
         var bodyValidationErrorMessage = string.Join(", ", httpRequestBody.ValidationResults.Select(s => s.ErrorMessage).ToArray());
-        log.LogError($"Error executing CreateTransaction :: {bodyValidationErrorMessage}");
-        return new BadRequestResult();
+        return new BadRequestObjectResult($"Error executing CreateTransaction :: {bodyValidationErrorMessage}");
       }
-
-      var dbConnectionStr = Environment.GetEnvironmentVariable("sqldb_connection");
-      var transaction = httpRequestBody.Value;
-      var query = "exec [dbo].[createTransaction] " +
-        $"@date = '{transaction.Date}'," +
-        $"@description = '{transaction.Description}'," +
-        $"@category = '{transaction.Category}'," +
-        $"@account = '{transaction.Account}'," +
-        $"@amount = {transaction.Amount}";
 
       try
       {
+        var transactionId = int.Parse(tId);
+        var transaction = httpRequestBody.Value;
+        var dbConnectionStr = Environment.GetEnvironmentVariable("sqldb_connection");
+        var query = "exec [dbo].[updateTransaction] " +
+          $"@transactionId={transactionId}, " +
+          $"@date='{transaction.Date}'," +
+          $"@description='{transaction.Description}'," +
+          $"@category='{transaction.Category}'," +
+          $"@account='{transaction.Account}'," +
+          $"@amount={transaction.Amount}";
+
         using SqlConnection conn = new SqlConnection(dbConnectionStr);
         conn.Open();
         using SqlCommand cmd = new SqlCommand(query, conn);
@@ -46,7 +46,7 @@ namespace cashTrackApi
       }
       catch (Exception e)
       {
-        log.LogError($"Error executing CreateTransaction :: {e}");
+        log.LogError($"Error executing UpdateTransaction :: {e}");
         return new BadRequestResult();
       }
     }
