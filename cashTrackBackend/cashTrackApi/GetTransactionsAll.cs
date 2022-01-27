@@ -31,7 +31,7 @@ namespace cashTrackApi
         {
           var transaction = new TransactionResource()
           {
-            TransactionId = (int)reader["TransactionId"],
+            //TransactionId = (int)reader["TransactionId"],
             Date = (DateTime)reader["Date"],
             Description = reader["Description"].ToString(),
             Category = reader["Category"].ToString(),

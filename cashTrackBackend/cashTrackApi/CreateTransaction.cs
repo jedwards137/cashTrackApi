@@ -5,7 +5,6 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -15,9 +14,13 @@ namespace cashTrackApi
   {
     [FunctionName("CreateTransaction")]
     public static async Task<IActionResult> Run(
-        [HttpTrigger(AuthorizationLevel.Function, "post", Route = "transactions")] HttpRequest req, ILogger log)
+        [HttpTrigger(AuthorizationLevel.Function, "post", Route = "transactions")] HttpRequest req, ILogger log,
+        [CosmosDB(
+          databaseName: "cashTrackDatabase",
+          collectionName: "transactionsContainer",
+          ConnectionStringSetting = "cosmosDbConnection")] IAsyncCollector<object> transactions)
     {
-      var httpRequestBody = await req.GetBodyAsync<TransactionResource>();
+      var httpRequestBody = await req.GetBodyAsync<TransactionDto>();
 
       var isInvalidRequestBody = !httpRequestBody.IsValid;
       if (isInvalidRequestBody)
@@ -27,22 +30,10 @@ namespace cashTrackApi
         return new BadRequestResult();
       }
 
-      var dbConnectionStr = Environment.GetEnvironmentVariable("sqldb_connection");
-      var transaction = httpRequestBody.Value;
-      var query = "exec [dbo].[createTransaction] " +
-        $"@date = '{transaction.Date}'," +
-        $"@description = '{transaction.Description}'," +
-        $"@category = '{transaction.Category}'," +
-        $"@account = '{transaction.Account}'," +
-        $"@amount = {transaction.Amount}";
-
       try
       {
-        using SqlConnection conn = new SqlConnection(dbConnectionStr);
-        conn.Open();
-        using SqlCommand cmd = new SqlCommand(query, conn);
-        var rows = await cmd.ExecuteNonQueryAsync();
-        return new OkObjectResult($"{rows} rows inserted");
+        await transactions.AddAsync(httpRequestBody.Value);
+        return new OkObjectResult("");
       }
       catch (Exception e)
       {
