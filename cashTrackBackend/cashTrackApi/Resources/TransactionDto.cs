@@ -6,6 +6,9 @@ namespace cashTrackApi.Resources
   public class TransactionDto
   {
     [Required]
+    public string TransactionId { get; set; }
+
+    [Required]
     [DataType(DataType.Date)]
     public DateTime Date { get; set; }
 
@@ -15,6 +18,10 @@ namespace cashTrackApi.Resources
     [Required]
     [StringLength(50)]
     public string Category { get; set; }
+
+    [Required]
+    [StringLength(50)]
+    public string SubCategory { get; set; }
 
     [Required]
     [StringLength(50)]

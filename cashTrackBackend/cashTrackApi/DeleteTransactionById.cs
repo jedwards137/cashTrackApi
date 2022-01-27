@@ -11,21 +11,21 @@ namespace cashTrackApi
 {
   public static class DeleteTransactionById
   {
-    [FunctionName("DeleteTransaction")]
+    [FunctionName("DeleteTransactionById")]
     public static async Task<IActionResult> Run(
-        [HttpTrigger(AuthorizationLevel.Function, "delete", Route = "transactions/{tId}")] HttpRequest req, ILogger log,
+        [HttpTrigger(AuthorizationLevel.Function, "delete", Route = "transactions/{tId}/azureId/{azureId}")] HttpRequest req, ILogger log,
         [CosmosDB(
           databaseName: "cashTrackDatabase", 
-          collectionName: "transactionsContainer", 
-          Id = "{tId}",
+          collectionName: "transactionsContainer",
+          Id = "{azureId}",
           PartitionKey = "{tid}",
           ConnectionStringSetting = "cosmosDbConnection")] Document document,
         [CosmosDB(
           databaseName: "cashTrackDatabase",
           collectionName: "transactionsContainer",
-          ConnectionStringSetting = "cosmosDbConnection")] DocumentClient client, string tId)
+          ConnectionStringSetting = "cosmosDbConnection")] DocumentClient client, string tId, string azureId)
     {
-      var badRequest = document == null || string.IsNullOrEmpty(tId);
+      var badRequest = document == null || string.IsNullOrEmpty(tId) || string.IsNullOrEmpty(azureId);
       if (badRequest)
       {
         return new BadRequestResult();
