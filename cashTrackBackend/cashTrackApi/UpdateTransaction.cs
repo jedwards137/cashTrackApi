@@ -33,7 +33,7 @@ namespace cashTrackApi
       if (isInvalidRequestBody)
       {
         var bodyValidationErrorMessage = string.Join(", ", httpRequestBody.ValidationResults.Select(s => s.ErrorMessage).ToArray());
-        log.LogError($"Error executing CreateTransaction :: {bodyValidationErrorMessage}");
+        log.LogError($"Error executing UpdateTransaction :: {bodyValidationErrorMessage}");
         return new BadRequestResult();
       }
 
