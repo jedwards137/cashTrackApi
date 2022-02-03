@@ -6,7 +6,7 @@ namespace cashTrackApi.Resources
   public class TransactionDto
   {
     [Required]
-    public string TransactionId { get; set; }
+    public string UserId { get; set; }
 
     [Required]
     [DataType(DataType.Date)]

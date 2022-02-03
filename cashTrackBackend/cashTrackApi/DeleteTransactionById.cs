@@ -13,24 +13,24 @@ namespace cashTrackApi
   {
     [FunctionName("DeleteTransactionById")]
     public static async Task<IActionResult> Run(
-        [HttpTrigger(AuthorizationLevel.Function, "delete", Route = "transactions/{tId}/azureId/{azureId}")] HttpRequest req, ILogger log,
+        [HttpTrigger(AuthorizationLevel.Function, "delete", Route = "transactions/{userId}/azureId/{azureId}")] HttpRequest req, ILogger log,
         [CosmosDB(
           databaseName: "cashTrackDatabase", 
           collectionName: "transactionsContainer",
           Id = "{azureId}",
-          PartitionKey = "{tid}",
+          PartitionKey = "{userId}",
           ConnectionStringSetting = "cosmosDbConnection")] Document document,
         [CosmosDB(
           databaseName: "cashTrackDatabase",
           collectionName: "transactionsContainer",
-          ConnectionStringSetting = "cosmosDbConnection")] DocumentClient client, string tId, string azureId)
+          ConnectionStringSetting = "cosmosDbConnection")] DocumentClient client, string userId, string azureId)
     {
-      var badRequest = document == null || string.IsNullOrEmpty(tId) || string.IsNullOrEmpty(azureId);
+      var badRequest = document == null || string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(azureId);
       if (badRequest)
       {
         return new BadRequestResult();
       }
-      await client.DeleteDocumentAsync(document.SelfLink, new RequestOptions() { PartitionKey = new PartitionKey(tId) });
+      await client.DeleteDocumentAsync(document.SelfLink, new RequestOptions() { PartitionKey = new PartitionKey(userId) });
       return new OkResult();
     }
   }

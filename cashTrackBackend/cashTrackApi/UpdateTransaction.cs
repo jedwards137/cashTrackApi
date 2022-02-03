@@ -15,17 +15,17 @@ namespace cashTrackApi
   {
     [FunctionName("UpdateTransaction")]
     public static async Task<IActionResult> Run(
-        [HttpTrigger(AuthorizationLevel.Function, "put", Route = "transactions/{tId}/azureId/{azureId}")] HttpRequest req, ILogger log,
+        [HttpTrigger(AuthorizationLevel.Function, "put", Route = "transactions/{userId}/azureId/{azureId}")] HttpRequest req, ILogger log,
         [CosmosDB(
           databaseName: "cashTrackDatabase",
           collectionName: "transactionsContainer",
           Id = "{azureId}",
-          PartitionKey = "{tid}",
+          PartitionKey = "{userId}",
           ConnectionStringSetting = "cosmosDbConnection")] Document document,
         [CosmosDB(
           databaseName: "cashTrackDatabase",
           collectionName: "transactionsContainer",
-          ConnectionStringSetting = "cosmosDbConnection")] DocumentClient client, string tId, string azureId)
+          ConnectionStringSetting = "cosmosDbConnection")] DocumentClient client, string userId, string azureId)
     {
       var httpRequestBody = await req.GetBodyAsync<TransactionDto>();
 
@@ -37,7 +37,7 @@ namespace cashTrackApi
         return new BadRequestResult();
       }
 
-      var badRequest = document == null || string.IsNullOrEmpty(tId) || string.IsNullOrEmpty(azureId);
+      var badRequest = document == null || string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(azureId);
       if (badRequest)
       {
         return new BadRequestResult();
@@ -52,7 +52,7 @@ namespace cashTrackApi
       document.SetPropertyValue("Amount", updatesDto.Amount);
       document.SetPropertyValue("Type", updatesDto.Type);
 
-      await client.ReplaceDocumentAsync(document, new RequestOptions() { PartitionKey = new PartitionKey(tId) });   // DeleteDocumentAsync(document.SelfLink, new RequestOptions() { PartitionKey = new PartitionKey(tId) });
+      await client.ReplaceDocumentAsync(document, new RequestOptions() { PartitionKey = new PartitionKey(userId) });   // DeleteDocumentAsync(document.SelfLink, new RequestOptions() { PartitionKey = new PartitionKey(tId) });
       return new OkResult();
     }
   }
